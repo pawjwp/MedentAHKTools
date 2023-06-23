@@ -12,13 +12,11 @@
 	Sleep 200
 	SendEvent "{Enter}"
 	
-	/*Sleep 200
-	
 	ControlClick "Client Screen Element Window44", "BROAD TOP AREA MEDICAL CENTER JP"
 	Sleep 400
 	SetKeyDelay 10
 	SendEvent "Bauer"
 	SetKeyDelay 100
 	Sleep 200
-	SendEvent "{Enter}"*/
+	SendEvent "{Enter}"
 }

@@ -1,6 +1,24 @@
 #SingleInstance Force
+
+; Income Array
+incomeRef := [
+	[14580, 18225, 21870, 25515, 29160, 29161],
+	[19720, 24650, 29580, 34510, 39440, 39441],
+	[24860, 31075, 37290, 43505, 49720, 49721],
+	[30000, 37500, 45000, 52500, 60000, 60001],
+	[35140, 43925, 52710, 62495, 70280, 70281],
+	[40280, 50350, 60420, 70490, 80560, 80561],
+	[45420, 56775, 68130, 79485, 90840, 90841],
+	[50560, 63200, 75840, 88480, 101120, 101121]
+]
+
+
+
+
+
 ^+s::
 {
+	
 	; Create Control Arrays
 	MaritalControl := Array()
 	EmploymentControl := Array()
@@ -37,11 +55,24 @@
 	StudentControl.Push StatusGui.AddRadio("YS", "None")
 	StudentControl.Push StatusGui.AddRadio("YS", "Not Reported")
 
+	; Household Income Section
+	StatusGui.AddText("XS Section", "Annual Household Income")
+	Loop incomeRef.Length {
+		if (A_Index = 1) {
+			StatusGui.AddRadio("XS vIncome Section", String(A_Index))
+		} else {
+			StatusGui.AddRadio("XS Section", String(A_Index))
+		}
+		
+		for j in incomeRef[A_Index] {
+			StatusGui.AddRadio("YS", "$" . j)
+		}
+	}
+
 	; Default Values
 	MaritalControl[1].Value := 1
 	EmploymentControl[1].Value := 1
 	StudentControl[3].Value := 1
-
 
 	; Create OK Button
 	Btn := StatusGui.Add("Button", "Default XM Section", "OK")
@@ -57,10 +88,6 @@
 	StatusGui.Show()
 
 
-
-
-
-
 	quickKeys := InputHook("V B L3", "{Enter}{Esc}{Tab}{Up}{Down}{Right}{Left}")
 	quickKeys.OnEnd := SetValues
 	quickKeys.Start()
@@ -68,7 +95,7 @@
 	
 	SetValues(*)
 	{
-		;MsgBox(quickKeys.EndReason)
+		; MsgBox(quickKeys.EndReason)
 		if (quickKeys.EndReason = "Max") {
 			MaritalControl[SubStr(quickKeys.Input, 1, 1)].Value := 1
 			EmploymentControl[SubStr(quickKeys.Input, 2, 1)].Value := 1
@@ -80,6 +107,22 @@
 	{
 		StatusGui.Destroy()
 	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 	ProcessUserInput(*)
 	{
@@ -165,6 +208,28 @@
 			Sleep 200
 		}
 		
-		ControlClick "RichEdit20A14", "ahk_class MedentClient"
+		if (Saved.Income != 0) {
+			ControlClick "RichEdit20A14", "ahk_class MedentClient"
+			Sleep 200
+			
+			SetKeyDelay 10
+			SendEvent String(1 + Floor((Saved.Income - 1) / 7))
+			SetKeyDelay 100
+			Sleep 200		
+			
+			
+			if (Mod(Saved.Income - 1, 7) != 0) {
+				ControlClick "RichEdit20A17", "ahk_class MedentClient"
+				Sleep 200
+				
+				SetKeyDelay 10
+				SendEvent String(incomeRef[1 + Floor((Saved.Income - 1) / 7)][(Mod(Saved.Income - 1, 7))])
+				SetKeyDelay 100
+				Sleep 200
+			}
+		}
+		
+		
+		
 	}
 }

@@ -153,6 +153,7 @@
 				ControlClick "Client Screen Element Window29", "ahk_class MedentClient"
 			}
 			
+			Sleep 400
 			if (!newAccount) {
 				SendEvent "{Down}"
 				Sleep 100
@@ -192,6 +193,7 @@
 			} else {
 				ControlClick "Client Screen Element Window31", "ahk_class MedentClient"
 			}
+			
 			Sleep 400
 			SetKeyDelay 10
 			
