@@ -1,77 +1,86 @@
-﻿#SingleInstance
-#Persistent
+﻿#SingleInstance Force
+Persistent
+SetKeyDelay 150
 
-isActive := false
+
+clickMode := false
 currentField := 0
 totalFields := 14
 
-+1::
-if (!isActive)
+^1::		; Ctrl+1: Start Form Entry
 {
-	isActive := true
+	global currentField
+	
+	currentField := 0
 }
 
-+2::
-if (isActive)
+^2::		; Ctrl+2: Next Form Field
 {
+	SetKeyDelay 150
+	global currentField
+	
 	switch currentField {
 		case 0:
-			send, {Tab 3}
-			currentfield++
+			SendEvent "{Tab}{Tab}{Tab}"
+			currentField++
 			return
 		case 1:
-			send, {Tab 4}
-			currentfield++
+			SendEvent "{Tab}{Tab}{Tab}{Tab}"
+			currentField++
 			return
 		case 2:
-			send, {Tab}
-			currentfield++
+			SendEvent "{Tab}"
+			currentField++
 			return
 		case 3:
-			send, {Tab}
-			currentfield++
+			SendEvent "{Tab}"
+			currentField++
 			return
 		case 4:
-			send, {Tab}
-			currentfield++
+			SendEvent "{Tab}"
+			currentField++
 			return
 		case 5:
-			send, {Tab 2}
-			currentfield++
+			SendEvent "{Tab}{Tab}"
+			currentField++
 			return
 		case 6:
-			; CLICK STATUS
-			send, {Tab 5}
-			currentfield++
+			Click 700, 1060 ; Click Status
+			Sleep 500
+			SendEvent "{Tab}{Tab}{Tab}{Tab}{Tab}"
+			currentField++
 			return
 		case 7:
-			send, {Esc}{Tab 18}
-			currentfield++
+			SendEvent "{Esc}"
+			Sleep 500
+			SendEvent "{Tab}{Tab}{Tab}{Tab}{Tab}{Tab}{Tab}{Tab}{Tab}{Tab}{Tab}{Tab}{Tab}{Tab}{Tab}{Tab}{Tab}{Tab}"
+			currentField++
 			return
 		case 8:
-			send, {lshift down}{Tab 2}{lshift up}{Tab}
-			currentfield++
+			SendEvent "{LShift down}{Tab}{LShift up}"
+			currentField++
 			return
 		case 9:
-			send, {lshift down}{Tab 2}{lshift up}{Tab}
-			currentfield++
+			SendEvent "{LShift down}{Tab}{LShift up}"
+			currentField++
 			return
 		case 10:
-			; CLICK STATUS
-			send, {Tab 11}
-			currentfield++
+			Click 700, 1060 ; Click Status
+			Sleep 500
+			SendEvent "{Tab}{Tab}{Tab}{Tab}{Tab}{Tab}{Tab}{Tab}{Tab}{Tab}{Tab}"
+			currentField++
 			return
 		case 11:
-			send, {Tab 3}
-			currentfield++
+			SendEvent "{Tab}{Tab}{Tab}"
+			currentField++
 			return
 		case 12:
-			send, {lshift down}{Tab 7}{lshift up}{Tab}
-			currentfield++
+			SendEvent "{LShift down}{Tab}{Tab}{Tab}{Tab}{Tab}{Tab}{LShift up}"
+			currentField++
 			return
 		case 13:
-			send, {lshift down}{Tab 2}{lshift up}{Tab}
-			currentfield++
+			SendEvent "{LShift down}{Tab}{LShift up}"
+			currentField++
 			return
 		default:
 			isActive := false
@@ -80,54 +89,109 @@ if (isActive)
 	}
 }
 
-+3::
-if (isActive)
+^3::		; Ctrl+3: Edit Field (Type Mode)
 {
+	SetKeyDelay 150
+	global clickMode
+	global currentField
+	
+	clickMode := false
 	switch currentField {
 		case 7:
-			send, {F1}
+			SendEvent "{F1}"
 			return
 		case 8:
-			send, {F1}
+			SendEvent "{F1}"
 			return
 		case 9:
-			send, {F1}{Down}{Enter}
+			SendEvent "{F1}{Down}{Enter}"
 			return
 		case 10:
-			send, {F1}{Down}{Enter}
+			SendEvent "{F1}{Down}{Enter}"
 			return
 		case 13:
-			send, {F1}
+			SendEvent "{F1}"
 			return
 		case 14:
-			send, {F1}
+			SendEvent "{F1}"
 			return
 	}
 }
 
-+4::
-if (isActive)
+^4::		; Ctrl+4: Edit Field (Click Mode)
 {
+	SetKeyDelay 150
+	global clickMode
+	global currentField
+	
+	clickMode := true
 	switch currentField {
 		case 7:
-			send, {Enter}
+			SendEvent "{F1}"
 			return
 		case 8:
-			send, {Esc}{lshift down}{Tab 2}{lshift up}{Tab}
+			SendEvent "{F1}"
 			return
 		case 9:
-			send, {Enter}
-			; IF HISPANIC		send, {Down}{Enter}{Esc}
-			send, {Esc}{lshift down}{Tab 2}{lshift up}{Tab}
+			SendEvent "{F1}{Down}{Enter}"
 			return
 		case 10:
-			send, {Enter}{Down}{Enter}{Esc}{Esc}{lshift down}{Tab 2}{lshift up}{Tab}
+			SendEvent "{F1}{Down}{Enter}"
 			return
 		case 13:
-			send, {Enter}{lshift down}{Tab 2}{lshift up}{Tab}
+			SendEvent "{F1}"
 			return
 		case 14:
-			send, {Enter}
+			SendEvent "{F1}"
 			return
+	}
+}
+
+^5::		; Ctrl+2: Save Current Field
+{
+	SetKeyDelay 150
+	global clickMode
+	global currentField
+	
+	if (!clickMode) {
+		switch currentField {
+			case 7:
+				SendEvent "{Enter}"
+				return
+			case 8:
+				SendEvent "{Esc}{LShift down}{Tab}{LShift up}"
+				return
+			case 9:
+				SendEvent "{Enter}"
+				; IF HISPANIC		SendEvent "{Down}{Enter}{Esc}"
+				SendEvent "{Esc}{LShift down}{Tab}{LShift up}"
+				return
+			case 10:
+				SendEvent "{Enter}{Down}{Enter}{Esc}{Esc}{LShift down}{Tab}{LShift up}"
+				return
+			case 13:
+				SendEvent "{Enter}{LShift down}{Tab}{LShift up}"
+				return
+			case 14:
+				SendEvent "{Enter}"
+				return
+		}
+	}
+
+	if (clickMode) {
+		switch currentField {
+			case 8:
+				SendEvent "{Esc}{LShift down}{Tab}{LShift up}"
+				return
+			case 9:
+				SendEvent "{Esc}{LShift down}{Tab}{LShift up}"
+				return
+			case 10:
+				SendEvent "{Esc}{Esc}{LShift down}{Tab}{LShift up}"
+				return
+			case 13:
+				SendEvent "{LShift down}{Tab}{LShift up}"
+				return
+		}
 	}
 }
