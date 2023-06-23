@@ -1,4 +1,6 @@
 #SingleInstance Force
+^+r::Reload  ; Ctrl+Alt+R
+
 ^+w::
 {
 	; Create Control Arrays
@@ -46,11 +48,9 @@
 	
 	; Create Cancel Button
 	Btn := DemographicGui.Add("Button", "YS", "Cancel")
-	Btn.OnEvent("Click", CloseWindow)
+	Btn.OnEvent("Click", (*) => DemographicGui.Destroy())
 	
 	DemographicGui.OnEvent('Escape', (*) => DemographicGui.Destroy())
-	
-	
 	DemographicGui.Show()
 
 
@@ -63,8 +63,7 @@
 	quickKeys.Start()
 	
 	
-	SetValues(*)
-	{
+	SetValues(*) {
 		;MsgBox(quickKeys.EndReason)
 		if (quickKeys.EndReason = "Max") {
 			LanguageControl[SubStr(quickKeys.Input, 1, 1)].Value := 1
@@ -73,13 +72,7 @@
 		}
 	}
 
-	CloseWindow(*)
-	{
-		DemographicGui.Destroy()
-	}
-
-	ProcessUserInput(*)
-	{
+	ProcessUserInput(*) {
 		quickKeys.Stop()
 		Saved := DemographicGui.Submit()  ; Save the contents of named controls into an object.
 		; MsgBox("Language Status:" Saved.Language "`n" "Ethnicity Status:" Saved.Ethnicity "`n" "Race Status:" Saved.Race)
@@ -116,8 +109,7 @@
 			
 			SetKeyDelay 10
 			
-			switch Saved.Race
-			{
+			switch Saved.Race {
 				case 1:
 					SendEvent "White"
 				case 2:
@@ -163,8 +155,7 @@
 			
 			SetKeyDelay 10
 			
-			switch Saved.Ethnicity
-			{
+			switch Saved.Ethnicity {
 				case 1:
 					SendEvent "Hispanic"
 				case 2:
@@ -197,8 +188,7 @@
 			Sleep 400
 			SetKeyDelay 10
 			
-			switch Saved.Language
-			{
+			switch Saved.Language {
 				case 1:
 					SendEvent "English"
 				case 2:

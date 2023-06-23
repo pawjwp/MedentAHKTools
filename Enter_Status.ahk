@@ -1,4 +1,6 @@
 #SingleInstance Force
+^+r::Reload  ; Ctrl+Alt+R
+
 
 ; Income Array
 incomeRef := [
@@ -14,8 +16,6 @@ incomeRef := [
 
 
 
-
-
 ^+s::
 {
 	
@@ -23,6 +23,7 @@ incomeRef := [
 	MaritalControl := Array()
 	EmploymentControl := Array()
 	StudentControl := Array()
+	IncomeControl := Array()
 
 	; Initialize Gui
 	StatusGui := Gui(, "Status Selection")
@@ -59,13 +60,13 @@ incomeRef := [
 	StatusGui.AddText("XS Section", "Annual Household Income")
 	Loop incomeRef.Length {
 		if (A_Index = 1) {
-			StatusGui.AddRadio("XS vIncome Section", String(A_Index))
+			IncomeControl.Push StatusGui.AddRadio("XS vIncome Section", String(A_Index))
 		} else {
-			StatusGui.AddRadio("XS Section", String(A_Index))
+			IncomeControl.Push StatusGui.AddRadio("XS Section", String(A_Index))
 		}
 		
 		for j in incomeRef[A_Index] {
-			StatusGui.AddRadio("YS", "$" . j)
+			IncomeControl.Push StatusGui.AddRadio("YS", "$" . j)
 		}
 	}
 
@@ -80,33 +81,47 @@ incomeRef := [
 	
 	; Create Cancel Button
 	Btn := StatusGui.Add("Button", "YS", "Cancel")
-	Btn.OnEvent("Click", CloseWindow)
+	Btn.OnEvent("Click", (*) => StatusGui.Destroy())
 	
 	StatusGui.OnEvent('Escape', (*) => StatusGui.Destroy())
-	
-	
 	StatusGui.Show()
 
 
-	quickKeys := InputHook("V B L3", "{Enter}{Esc}{Tab}{Up}{Down}{Right}{Left}")
+
+	inputStep := 1
+	
+	quickKeys := InputHook("V B L1", "{Enter}{Esc}{Tab}{Up}{Down}{Right}{Left}")
 	quickKeys.OnEnd := SetValues
 	quickKeys.Start()
 	
 	
-	SetValues(*)
-	{
-		; MsgBox(quickKeys.EndReason)
+	SetValues(*) {
 		if (quickKeys.EndReason = "Max") {
-			MaritalControl[SubStr(quickKeys.Input, 1, 1)].Value := 1
-			EmploymentControl[SubStr(quickKeys.Input, 2, 1)].Value := 1
-			StudentControl[SubStr(quickKeys.Input, 3, 1)].Value := 1
+			switch inputStep {		
+				case 1:
+					MaritalControl[quickKeys.Input].Value := 1
+					quickKeys.Start()
+				case 2:
+					EmploymentControl[quickKeys.Input].Value := 1
+					quickKeys.Start()
+				case 3:
+					StudentControl[quickKeys.Input].Value := 1
+					quickKeys.Start()
+				case 4:
+					global IncomeControlIndex
+					IncomeControlIndex := 1 + ((quickKeys.Input - 1) * 7)
+					IncomeControl[IncomeControlIndex].Value := 1
+					quickKeys.Start()
+				case 5:
+					global IncomeControlIndex
+					IncomeControl[IncomeControlIndex + quickKeys.Input].Value := 1
+					quickKeys.Start()
+			}
+			
+			inputStep++
 		}
 	}
 
-	CloseWindow(*)
-	{
-		StatusGui.Destroy()
-	}
 
 
 
@@ -123,9 +138,7 @@ incomeRef := [
 
 
 
-
-	ProcessUserInput(*)
-	{
+	ProcessUserInput(*) {
 		quickKeys.Stop()
 		Saved := StatusGui.Submit()  ; Save the contents of named controls into an object.
 		; MsgBox("Marital Status:" Saved.Marital "`n" "Employment Status:" Saved.Employment "`n" "Student Status:" Saved.Student)
@@ -138,8 +151,7 @@ incomeRef := [
 			Sleep 400
 			SetKeyDelay 10
 			
-			switch Saved.Marital
-			{
+			switch Saved.Marital {
 				case 1:
 					SendEvent "Never"
 				case 2:
@@ -165,8 +177,7 @@ incomeRef := [
 			Sleep 400
 			SetKeyDelay 10
 			
-			switch Saved.Student
-			{
+			switch Saved.Student {
 				case 1:
 					SendEvent "Full"
 				case 2:
@@ -186,8 +197,7 @@ incomeRef := [
 			Sleep 400
 			SetKeyDelay 10
 			
-			switch Saved.Employment
-			{
+			switch Saved.Employment {
 				case 1:
 					SendEvent "Full"
 				case 2:
@@ -228,8 +238,5 @@ incomeRef := [
 				Sleep 200
 			}
 		}
-		
-		
-		
 	}
 }
