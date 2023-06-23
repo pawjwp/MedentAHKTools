@@ -12,51 +12,56 @@
 	; Initialize Gui
 	NewPatientGui := Gui(, "Basic Info Selection")
 
-	NewPatientGui.AddText("Section", "Birthday (MDY)")
-	NewPatientGui.AddEdit("YS-3 X+3 w24 r1 vBirthdayMonth")
-	NewPatientGui.AddEdit("YS-3 X+3 w24 r1 vBirthdayDay")
-	NewPatientGui.AddEdit("YS-3 X+3 w32 r1 vBirthdayYear")
-	NewPatientGui.AddText("YS X+5", "Sex")
-	NewPatientGui.AddRadio("YS X+3 vSex", "M")
-	NewPatientGui.AddRadio("YS X+0", "F")
+	NewPatientGui.AddText("Section", "Birthday:")
+	NewPatientGui.AddEdit("YS-3 X+3 w24 r1 vBirthdayMonth Number Limit2")
+	NewPatientGui.AddText("YS X+3", "/")
+	NewPatientGui.AddEdit("YS-3 X+3 w24 r1 vBirthdayDay Number Limit2")
+	NewPatientGui.AddText("YS X+3", "/")
+	NewPatientGui.AddEdit("YS-3 X+3 w32 r1 vBirthdayYear Number Limit4")
+	NewPatientGui.AddText("YS X+3", "(MDY)")
+	NewPatientGui.AddText("YS X+42", "Sex:")
+	NewPatientGui.AddDropDownList("YS-3 X+3 vSex w70", ["Male", "Female", "Unknown"])
 	
-	NewPatientGui.AddText("XS Section", "Name")
-	NewPatientGui.AddEdit("YS-3 X+3 w75 r1 vFirstName")
+	NewPatientGui.AddText("XS Section", "Name:")
+	NewPatientGui.AddEdit("YS-3 X+3 w105 r1 vFirstName")
 	NewPatientGui.AddEdit("YS-3 X+3 w20 r1 vMiddleName")
-	NewPatientGui.AddEdit("YS-3 X+3 w75 r1 vLastName")
+	NewPatientGui.AddEdit("YS-3 X+3 w150 r1 vLastName")
 	
-	NewPatientGui.AddText("XS Section", "Address")
-	NewPatientGui.AddEdit("YS-3 X+3 w165 r1 vAddress1")
-	NewPatientGui.AddEdit("YS-3 X+3 w165 r1 vAddress2")
+	NewPatientGui.AddText("XS Section", "Address:")
+	NewPatientGui.AddEdit("YS-3 X+3 w135 r1 vAddress1")
+	NewPatientGui.AddText("YS X+5", "Line 2:")
+	NewPatientGui.AddEdit("YS-3 X+3 w96 r1 vAddress2")
 	
-	NewPatientGui.AddText("XS Section", "City")
-	NewPatientGui.AddEdit("YS-3 X+3 w115 r1 vCity")
-	NewPatientGui.AddText("YS X+5", "Zip")
-	NewPatientGui.AddEdit("YS-3 X+3 w45 r1 vZip")
+	NewPatientGui.AddText("XS Section", "City:")
+	NewPatientGui.AddEdit("YS-3 X+3 w128 r1 vCity")
+	NewPatientGui.AddText("YS X+24", "State:")
+	NewPatientGui.AddEdit("YS-3 X+3 w24 r1 vState ReadOnly", "PA")
+	NewPatientGui.AddText("YS X+24", "Zip:")
+	NewPatientGui.AddEdit("YS-3 X+3 w40 r1 vZip Number Limit5")
 	
-	NewPatientGui.AddText("XS Section", "Home")
-	NewPatientGui.AddEdit("YS-3 X+3 w72 r1 vPhoneHome")
-	NewPatientGui.AddText("YS X+5", "Cell")
-	NewPatientGui.AddEdit("YS-3 X+3 w72 r1 vPhoneCell")
-	NewPatientGui.AddText("YS X+5", "Work")
-	NewPatientGui.AddEdit("YS-3 X+3 w72 r1 vPhoneWork")
+	NewPatientGui.AddText("XS Section", "Home:")
+	NewPatientGui.AddEdit("YS-3 X+3 w72 r1 vPhoneHome Number Limit10")
+	NewPatientGui.AddText("YS X+5", "Cell:")
+	NewPatientGui.AddEdit("YS-3 X+3 w72 r1 vPhoneCell Number Limit10")
+	NewPatientGui.AddText("YS X+5", "Work:")
+	NewPatientGui.AddEdit("YS-3 X+3 w72 r1 vPhoneWork Number Limit10")
 	
-	NewPatientGui.AddText("XS Section", "Email")
-	NewPatientGui.AddEdit("YS-3 X+3 w170 r1 vEmail")
+	NewPatientGui.AddText("XS Section", "Email:")
+	NewPatientGui.AddEdit("YS-3 X+3 w284 r1 vEmail")
 
-	NewPatientGui.AddText("XS Section", "Language")
+	NewPatientGui.AddText("XS Section", "Language:")
 	LanguageControl.Push NewPatientGui.AddRadio("XS vLanguage Section", "English")
 	LanguageControl.Push NewPatientGui.AddRadio("YS X+0", "Spanish")
 	LanguageControl.Push NewPatientGui.AddRadio("YS X+0", "Sign Language")
 	LanguageControl.Push NewPatientGui.AddRadio("YS X+0", "Not Reported")
 
-	NewPatientGui.AddText("XS Section", "Ethnicity")
+	NewPatientGui.AddText("XS Section", "Ethnicity:")
 	EthnicityControl.Push NewPatientGui.AddRadio("XS vEthnicity Section", "Latino/Hispanic")
 	EthnicityControl.Push NewPatientGui.AddRadio("YS X+0", "Not Latino/Hispanic")
 	EthnicityControl.Push NewPatientGui.AddRadio("YS X+0", "Refused")
 	EthnicityControl.Push NewPatientGui.AddRadio("YS X+0", "Not Reported")
 
-	NewPatientGui.AddText("XS Section", "Race")
+	NewPatientGui.AddText("XS Section", "Race:")
 	RaceControl.Push NewPatientGui.AddRadio("XS vRace Section", "Caucasian")
 	RaceControl.Push NewPatientGui.AddRadio("YS X+0", "African American")
 	RaceControl.Push NewPatientGui.AddRadio("YS X+0", "Asian")
@@ -92,15 +97,6 @@
 
 
 
-
-
-
-
-
-
-
-
-
 	
 	ProcessUserInput(*)	{
 		Saved := NewPatientGui.Submit()  ; Save the contents of named controls into an object.
@@ -113,8 +109,7 @@
 		} else { ; If neither, it is likely on the wrong page and should cancel (by setting values to nothing)
 			Saved.Race := 7
 			Saved.Ethnicity := 4
-			Saved.Language := 4
-			
+			Saved.Language := 4	
 			MsgBox("Wrong Page, Cancelling")
 		}
 		
@@ -137,20 +132,26 @@
 			try {
 				if (InStr(ControlGetText("Pop Label Class1", "ahk_class MedentClient"), "Already on File") > 0) {
 					continueResult := MsgBox("Patient name already on file. Continue?",, "YesNo")
-					if (continueResult = "Yes") {
-						ControlClick "CHwndCppBase Window Class15", "ahk_class MedentClient"
+				}
+				if (continueResult != "No") {
+					if (ControlGetText("CHwndCppBase Window Class14", "ahk_class MedentClient") = "Yes") {
 						Sleep 200
-					ControlClick "RichEdit20A3", "ahk_class MedentClient"
-					} else {
-						return
+						ControlGetPos &x, &y, &w, &h, "CHwndCppBase Window Class14", "ahk_class MedentClient"
+						Sleep 200
+						MouseMove x + (w / 2), y + (h / 2)
+						Sleep 200
+						ControlClick "CHwndCppBase Window Class14", "ahk_class MedentClient"
 					}
+					Sleep 200
+					ControlClick "RichEdit20A3", "ahk_class MedentClient"
+					Sleep 200
 				}
 			}
-			
+
 			SendEvent Saved.MiddleName ; truncate here
 			Sleep 100
 			SendEvent "{Tab}"
-			Sleep 400
+			Sleep 200
 			SendEvent Saved.Address1
 			Sleep 100
 			SendEvent "{Tab}"
@@ -164,10 +165,11 @@
 			SendEvent "{Tab}"
 			Sleep 200
 			SendEvent Saved.City
-			Sleep 400
+			Sleep 200
 			SendEvent "{Enter}"
 			Sleep 200
 			ControlClick "RichEdit20A8", "ahk_class MedentClient"
+			Sleep 200
 			SendEvent "{Tab}"
 			Sleep 200
 			SendEvent Saved.PhoneHome
@@ -196,11 +198,15 @@
 			Sleep 100
 			SendEvent "{Tab}"
 			Sleep 200
-			if (Saved.Sex = 1) {
-				SendEvent "M"
-			}
-			if (Saved.Sex = 2) {
-				SendEvent "F"
+			
+			switch Saved.Sex
+			{
+				case "Male":
+					SendEvent "M"
+				case "Female":
+					SendEvent "F"
+				case "Unknown":
+					SendEvent "U"
 			}
 			Sleep 400
 		}
