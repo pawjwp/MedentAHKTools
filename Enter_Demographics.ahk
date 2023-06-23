@@ -7,7 +7,7 @@
 	RaceControl := Array()
 
 	; Initialize Gui
-	DemographicGui := Gui(, "Status Selection")
+	DemographicGui := Gui(, "Demographics Selection")
 
 
 	; Language Section
@@ -44,7 +44,7 @@
 	Btn := DemographicGui.Add("Button", "Default XM Section", "OK")
 	Btn.OnEvent("Click", ProcessUserInput)
 	
-	; Create OK Button
+	; Create Cancel Button
 	Btn := DemographicGui.Add("Button", "YS", "Cancel")
 	Btn.OnEvent("Click", CloseWindow)
 	
@@ -58,7 +58,7 @@
 
 
 
-	/*quickKeys := InputHook("B L3", "{Enter}{Esc}{Tab}{Up}{Down}{Right}{Left}")
+	quickKeys := InputHook("V B L3", "{Enter}{Esc}{Tab}{Up}{Down}{Right}{Left}")
 	quickKeys.OnEnd := SetValues
 	quickKeys.Start()
 	
@@ -71,7 +71,7 @@
 			EthnicityControl[SubStr(quickKeys.Input, 2, 1)].Value := 1
 			RaceControl[SubStr(quickKeys.Input, 3, 1)].Value := 1
 		}
-	}*/
+	}
 
 	CloseWindow(*)
 	{
@@ -80,20 +80,40 @@
 
 	ProcessUserInput(*)
 	{
-		;quickKeys.Stop()
+		quickKeys.Stop()
 		Saved := DemographicGui.Submit()  ; Save the contents of named controls into an object.
 		; MsgBox("Language Status:" Saved.Language "`n" "Ethnicity Status:" Saved.Ethnicity "`n" "Race Status:" Saved.Race)
+		
+		if (ControlGetText("ChwndCppBase Window Class12", "ahk_class MedentClient") = "Add Account Memb") { ; If Class12 is Add Account, it a new account
+			newAccount := true
+		} else if  (ControlGetText("ChwndCppBase Window Class12", "ahk_class MedentClient") = "Hipaa") { ; If Class12 is Hipaa, it an existing account
+			newAccount := false
+		} else { ; If neither, it is likely on the wrong page and should cancel (by setting values to nothing)
+			Saved.Race := 7
+			Saved.Ethnicity := 4
+			Saved.Language := 4
+			
+			MsgBox("Wrong Page, Cancelling")
+		}
 		
 		SetKeyDelay 100
 		Sleep 100
 		
 		if (Saved.Race != 7) {
-			ControlClick "Client Screen Element Window27", "ahk_class MedentClient"
+			if (newAccount) {
+				ControlClick "Client Screen Element Window26", "ahk_class MedentClient"
+			} else {
+				ControlClick "Client Screen Element Window27", "ahk_class MedentClient"
+			}
+			
 			Sleep 400
-			SendEvent "{Down}"
-			Sleep 100
-			SendEvent "{Enter}"
-			Sleep 200
+			if (!newAccount) {
+				SendEvent "{Down}"
+				Sleep 100
+				SendEvent "{Enter}"
+				Sleep 200
+			}
+			
 			SetKeyDelay 10
 			
 			switch Saved.Race
@@ -127,12 +147,19 @@
 		}
 		
 		if (Saved.Ethnicity != 4) {
-			ControlClick "Client Screen Element Window29", "ahk_class MedentClient"
-			Sleep 400
-			SendEvent "{Down}"
-			Sleep 100
-			SendEvent "{Enter}"
-			Sleep 200
+			if (newAccount) {
+				ControlClick "Client Screen Element Window28", "ahk_class MedentClient"
+			} else {
+				ControlClick "Client Screen Element Window29", "ahk_class MedentClient"
+			}
+			
+			if (!newAccount) {
+				SendEvent "{Down}"
+				Sleep 100
+				SendEvent "{Enter}"
+				Sleep 200
+			}
+			
 			SetKeyDelay 10
 			
 			switch Saved.Ethnicity
@@ -160,7 +187,11 @@
 		}
 		
 		if (Saved.Language != 4) {
-			ControlClick "Client Screen Element Window31", "ahk_class MedentClient"
+			if (newAccount) {
+				ControlClick "Client Screen Element Window30", "ahk_class MedentClient"
+			} else {
+				ControlClick "Client Screen Element Window31", "ahk_class MedentClient"
+			}
 			Sleep 400
 			SetKeyDelay 10
 			
