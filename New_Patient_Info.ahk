@@ -82,7 +82,8 @@ global fields := ["BirthdayMonth", "BirthdayDay", "BirthdayYear", "Sex", "FirstN
 	Doctor := NewPatientGui.AddComboBox("YS-3 X+19 vDoctor w120", ["Bauer"])
 	
 	; Resubmit
-	Resubmit := NewPatientGui.AddCheckBox("XS+54 Section vResubmit", "Resubmit unchanged text?")
+	NewPatientGui.AddText("XS Section", "Options:")
+	Resubmit := NewPatientGui.AddCheckBox("YS X+15 Section vResubmit Hidden", "Resubmit unchanged text?")
 	
 	
 	; Create Submit Button
@@ -103,8 +104,7 @@ global fields := ["BirthdayMonth", "BirthdayDay", "BirthdayYear", "Sex", "FirstN
 	
 	NewPatientGui.OnEvent('Escape', (*) => NewPatientGui.Destroy())
 	
-	NewPatientGui.Show()
-
+	NewPatientGui.Show("AutoSize")
 
 
 
@@ -121,12 +121,11 @@ global fields := ["BirthdayMonth", "BirthdayDay", "BirthdayYear", "Sex", "FirstN
 		}
 	}
 	
-	LoadCurrent(*)	{	
+	LoadCurrent(*)	{
 		lockFields := ["BirthdayMonth", "BirthdayDay", "BirthdayYear", "FirstName", "MiddleName", "LastName", "Address1", "Address2", "City", "State", "Zip", "PhoneHome", "PhoneCell", "PhoneWork", "WorkExtension", "Doctor"]	
 		; Unlock fields
 		for field in lockFields {
 			%field%.Opt("-ReadOnly")
-			
 		}
 	
 	
@@ -226,6 +225,8 @@ global fields := ["BirthdayMonth", "BirthdayDay", "BirthdayYear", "Sex", "FirstN
 		}
 		
 		global Current := NewPatientGui.Submit(false)
+		
+		Resubmit.Visible := true
 	}
 	
 	ProcessUserInput(*)	{
@@ -255,39 +256,39 @@ global fields := ["BirthdayMonth", "BirthdayDay", "BirthdayYear", "Sex", "FirstN
 		Sleep 100
 		SetKeyDelay 10
 		
-		ControlClick "RichEdit20A1", "ahk_class MedentClient"
-		Sleep 400
-		
-		SendEvent Saved.FirstName
-		Sleep 100
-		SendEvent "{Tab}"
-		Sleep 600
-		SendEvent Saved.LastName
-		Sleep 100
-		SendEvent "{Tab}"
-		Sleep 400
-		
-		try {
-			if (InStr(ControlGetText("Pop Label Class1", "ahk_class MedentClient"), "Already on File") > 0) {
-				continueResult := MsgBox("Patient name already on file. Continue?",, "YesNo")
-			}
-			if (continueResult != "No") {
-				if (ControlGetText("CHwndCppBase Window Class14", "ahk_class MedentClient") = "Yes") {
-					Sleep 200
-					ControlGetPos &x, &y, &w, &h, "CHwndCppBase Window Class14", "ahk_class MedentClient"
-					Sleep 200
-					MouseMove x + (w / 2), y + (h / 2)
-					Sleep 200
-					ControlClick "CHwndCppBase Window Class14", "ahk_class MedentClient"
+		if (Saved.FirstName != "" && Saved.MiddleName != "" && Saved.LastName != "") {
+			ControlClick "RichEdit20A1", "ahk_class MedentClient"
+			Sleep 400
+			SendEvent Saved.FirstName
+			Sleep 100
+			SendEvent "{Tab}"
+			Sleep 600
+			SendEvent Saved.LastName
+			Sleep 100
+			SendEvent "{Tab}"
+			Sleep 400
+			
+			try {
+				if (InStr(ControlGetText("Pop Label Class1", "ahk_class MedentClient"), "Already on File") > 0) {
+					continueResult := MsgBox("Patient name already on file. Continue?",, "YesNo")
 				}
-				Sleep 200
-				ControlClick "RichEdit20A3", "ahk_class MedentClient"
-				Sleep 200
+				if (continueResult != "No") {
+					if (ControlGetText("CHwndCppBase Window Class14", "ahk_class MedentClient") = "Yes") {
+						Sleep 200
+						ControlGetPos &x, &y, &w, &h, "CHwndCppBase Window Class14", "ahk_class MedentClient"
+						Sleep 200
+						MouseMove x + (w / 2), y + (h / 2)
+						Sleep 200
+						ControlClick "CHwndCppBase Window Class14", "ahk_class MedentClient"
+					}
+					Sleep 200
+					ControlClick "RichEdit20A3", "ahk_class MedentClient"
+					Sleep 200
+				}
 			}
+			SendEvent Saved.MiddleName ; truncate here
+			Sleep 100
 		}
-		
-		SendEvent Saved.MiddleName ; truncate here
-		Sleep 100
 		if (Saved.Address1 != "") {
 			ControlClick "RichEdit20A4", "ahk_class MedentClient"
 			Sleep 200
@@ -508,8 +509,8 @@ global fields := ["BirthdayMonth", "BirthdayDay", "BirthdayYear", "Sex", "FirstN
 }
 
 /*
-Make it use clicks instead of tabs for navigation and make lots of them optional (only when filled out)
-Make something to pull information from current page to compare
+Add reset button (hide resubmit checkbox too)
 Move "Not Reported" for demographics to checkbox
-Make it compatible with deceased/collection patients
+Check if button text is correct each time before clicking
+Make it compatible with collection patients
 */
