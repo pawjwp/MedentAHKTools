@@ -22,6 +22,7 @@ Loop Read "Patient_List.txt" {
 
 ^+c::
 {
+	cancelling := false
 	SetKeyDelay 10
 	
 	Loop People.Length { ; i is DOB, j is first, last name MI
@@ -32,7 +33,7 @@ Loop Read "Patient_List.txt" {
 		Outcome := ""
 		samePerson := false
 		
-		if (ControlGetText("CHwndCppBase Window Class14", "ahk_class MedentClient") = "Create account f") {
+		if (ControlGetText("CHwndCppBase Window Class14", "ahk_class MedentClient") = "Create account f" && !cancelling) {
 			Sleep 100
 			ControlClick "RichEdit20A3", "ahk_class MedentClient"
 			Sleep 200
@@ -66,18 +67,23 @@ Loop Read "Patient_List.txt" {
 				patientSelect := true
 				while (patientSelect) {
 					MouseMove 250, 200
-					result := MsgBox("Please select " . j . " then click OK.`nClick cancel if the name is not shown",, "OC 4096")
-					if (result = "OK") {
+					result := MsgBox("Please select " . j . " then click Yes.`nIf name is now shown, click No",, "YNC 4096")
+					if (result = "Yes") {
 						if (ControlGetText("CHwndCppBase Window Class11", "ahk_class MedentClient") != "Select") {
 							patientSelect := false
 							samePerson := true
 							Sleep 200
 						}
-					} else if (result = "Cancel") {
+					} else if (result = "No") {
 						patientSelect := false
 						mouseMoveClick("CHwndCppBase Window Class10")
 						Outcome := "NO"
 						Sleep 400
+					} else if (result = "Cancel") {
+						patientSelect := false
+						mouseMoveClick("CHwndCppBase Window Class10")
+						cancelling := true
+						Sleep 100
 					}
 				}
 			}
@@ -104,15 +110,19 @@ Loop Read "Patient_List.txt" {
 				MeLN := StrUpper(ControlGetText("RichEdit20A2", "ahk_class MedentClient"))
 				MeFN := StrUpper(ControlGetText("RichEdit20A1", "ahk_class MedentClient"))
 				
-				if (FiFN = MeFN || FiLN = MeLN) {
-					if (FiFN != MeFN || FiLN != MeLN) {
-						result := MsgBox("Is " . FiFN . " " . FiLN . " and " . MeFN . " " . MeLN . " the same person?",, "YN 4096")
+				if (FiFN = MeFN || FiLN = MeLN || samePerson) {
+					if ((FiFN != MeFN || FiLN != MeLN) || (FiFN != MeFN && FiLN != MeLN && samePerson)) {
+						result := MsgBox("Is " . FiFN . " " . FiLN . " and " . MeFN . " " . MeLN . " the same person?",, "YNC 4096")
 						if (result = "Yes") {
 							samePerson := true
-						} else {
+						} else if (result = "No") {
 							Outcome := "NO"
 							mouseMoveClick("CHwndCppBase Window Class5")
 							Sleep 400
+						} else if (result = "Cancel") {
+							mouseMoveClick("CHwndCppBase Window Class5")
+							cancelling := true
+							Sleep 100
 						}
 					}
 					if ((FiFN = MeFN && FiLN = MeLN) || samePerson) {
