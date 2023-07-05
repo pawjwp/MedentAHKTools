@@ -1,18 +1,28 @@
 #SingleInstance Force
 ^+r::Reload  ; Ctrl+Alt+R
 
-
-; Income Array
+; New Income Array (Upper limit in first column, lower limit in rest)
 incomeRef := [
+	[14580, 14581, 18226, 21871, 25516, 29161],
+	[19720, 19721, 24651, 29581, 34511, 39441],
+	[24860, 24861, 31076, 37291, 43506, 49721],
+	[30000, 30001, 37501, 45001, 52501, 60001],
+	[35140, 35141, 43926, 52711, 62496, 70281],
+	[40280, 40281, 50351, 60421, 70491, 80561],
+	[45420, 45421, 56776, 68131, 79486, 90841],
+	[50560, 50561, 63201, 75841, 88481, 101121]
+]
+; Old Income Array
+/*incomeRef := [
 	[14580, 18225, 21870, 25515, 29160, 29161],
 	[19720, 24650, 29580, 34510, 39440, 39441],
 	[24860, 31075, 37290, 43505, 49720, 49721],
 	[30000, 37500, 45000, 52500, 60000, 60001],
 	[35140, 43925, 52710, 62495, 70280, 70281],
-	[40280, 50350, 60420, 70490, 80560, 80561],
+	[40280, 50350, 60420, 70490, 80560, 8056-1],
 	[45420, 56775, 68130, 79485, 90840, 90841],
 	[50560, 63200, 75840, 88480, 101120, 101121]
-]
+]*/
 
 
 
@@ -75,13 +85,13 @@ incomeRef := [
 	EmploymentControl[1].Value := 1
 	StudentControl[3].Value := 1
 
-	; Create OK Button
-	Btn := StatusGui.Add("Button", "Default XM Section", "OK")
-	Btn.OnEvent("Click", ProcessUserInput)
+	; Create Submit Button
+	SubmitBtn := StatusGui.Add("Button", "Default XM Section", "Submit")
+	SubmitBtn.OnEvent("Click", ProcessUserInput)
 	
 	; Create Cancel Button
-	Btn := StatusGui.Add("Button", "YS", "Cancel")
-	Btn.OnEvent("Click", (*) => StatusGui.Destroy())
+	CancelBtn := StatusGui.Add("Button", "YS", "Cancel")
+	CancelBtn.OnEvent("Click", (*) => StatusGui.Destroy())
 	
 	StatusGui.OnEvent('Escape', (*) => StatusGui.Destroy())
 	StatusGui.Show()

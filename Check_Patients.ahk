@@ -1,11 +1,11 @@
 #SingleInstance Force
 
-global People := Map() ; first value (key) is DOB, second is Name
+global People := Array()
 global Output := ""
 
 Loop Read "Patient_List.txt" {
 	patientSplit := StrSplit(A_LoopReadLine, A_Tab)
-	People[patientSplit[2]] := patientSplit[1]
+	People.Push(patientSplit)
 	
 	; old
 	/*patientSplit := StrSplit(A_LoopReadLine, A_Tab)
@@ -24,7 +24,10 @@ Loop Read "Patient_List.txt" {
 {
 	SetKeyDelay 10
 	
-	for i, j in People { ; i is DOB, j is first, last name MI
+	Loop People.Length { ; i is DOB, j is first, last name MI
+		i := People[A_Index][2]
+		j := People[A_Index][1]
+		
 		global Output
 		Outcome := ""
 		samePerson := false
@@ -40,7 +43,7 @@ Loop Read "Patient_List.txt" {
 			SendEvent Format("{:02}", dateSplit[1])
 			SendEvent Format("{:02}", dateSplit[2])
 			Sleep 50
-				SendEvent "{Left}"
+			SendEvent "{Left}"
 			SendEvent "{Left}"
 			Sleep 50
 			SendEvent Format("{:04}", dateSplit[3])
@@ -62,16 +65,17 @@ Loop Read "Patient_List.txt" {
 			if (ControlGetText("CHwndCppBase Window Class11", "ahk_class MedentClient") = "Select") {
 				patientSelect := true
 				while (patientSelect) {
+					MouseMove 250, 200
 					result := MsgBox("Please select " . j . " then click OK.`nClick cancel if the name is not shown",, "OC 4096")
 					if (result = "OK") {
 						if (ControlGetText("CHwndCppBase Window Class11", "ahk_class MedentClient") != "Select") {
 							patientSelect := false
 							samePerson := true
-							Sleep 400
+							Sleep 200
 						}
 					} else if (result = "Cancel") {
 						patientSelect := false
-						ControlClick "CHwndCppBase Window Class10", "ahk_class MedentClient"
+						mouseMoveClick("CHwndCppBase Window Class10")
 						Outcome := "NO"
 						Sleep 400
 					}
@@ -80,11 +84,7 @@ Loop Read "Patient_List.txt" {
 			
 			try {
 				if (ControlGetText("Pop Label Class1", "ahk_class MedentClient") = "No Patient(s) Found.") {
-					ControlGetPos &x, &y, &w, &h, "CHwndCppBase Window Class11", "ahk_class MedentClient"
-					Sleep 20
-					MouseMove x + (w / 2), y + (h / 2)
-					Sleep 80
-					ControlClick "CHwndCppBase Window Class11", "ahk_class MedentClient"
+					mouseMoveClick("CHwndCppBase Window Class11")
 					Sleep 200
 					Outcome := "NO"
 				}
@@ -111,16 +111,19 @@ Loop Read "Patient_List.txt" {
 							samePerson := true
 						} else {
 							Outcome := "NO"
-							backToMenu()
+							mouseMoveClick("CHwndCppBase Window Class5")
+							Sleep 400
 						}
 					}
 					if ((FiFN = MeFN && FiLN = MeLN) || samePerson) {
-						if (ControlGetText("CHwndCppBase Window Class25", "ahk_class MedentClient") = "Status") {
-							ControlGetPos &x, &y, &w, &h, "CHwndCppBase Window Class25", "ahk_class MedentClient"
-							Sleep 100
-							MouseMove x + (w / 2), y + (h / 2)
-							Sleep 100
-							ControlClick "CHwndCppBase Window Class25", "ahk_class MedentClient"
+						if (ControlGetText("CHwndCppBase Window Class25", "ahk_class MedentClient") = "Status" || ControlGetText("CHwndCppBase Window Class26", "ahk_class MedentClient") = "Status") {
+							if (ControlGetText("CHwndCppBase Window Class25", "ahk_class MedentClient") = "Status") {
+								mouseMoveClick("CHwndCppBase Window Class25")
+							}
+							if (ControlGetText("CHwndCppBase Window Class26", "ahk_class MedentClient") = "Status") {
+								mouseMoveClick("CHwndCppBase Window Class26")
+							}
+							
 							Sleep 800
 							
 							if (ControlGetText("CHwndCppBase Window Class12", "ahk_class MedentClient") = "Billing Related ") {
@@ -129,13 +132,15 @@ Loop Read "Patient_List.txt" {
 									k := ", " . StrUpper(StrSplit(ControlGetText("RichEdit20A1", "ahk_class MedentClient"), " ")[1])
 								}
 								Outcome := "YES" . k
-								backToMenu()
+								mouseMoveClick("CHwndCppBase Window Class5")
+								Sleep 400
 							}
 						}
 					}
 				} else {
 					Outcome := "NO"
-					backToMenu()
+					mouseMoveClick("CHwndCppBase Window Class5")
+					Sleep 400
 				}
 			}
 			
@@ -146,9 +151,20 @@ Loop Read "Patient_List.txt" {
 		}
 		
 		if (Outcome = "") {
-			Output := Output . j .  A_Tab . i . "`n"
+			for p in People[A_Index] {
+				Output := Output . p . A_Tab
+			}
+			Output := Output . "`n"
 		} else {
-			Output := Output . StrUpper(j) .  A_Tab . StrUpper(i) .  A_Tab . FormatTime(, "MM/dd/yyyy") .  A_Tab . Outcome . "`n"
+			for p in People[A_Index] {
+				Output := Output . StrUpper(p) . A_Tab
+			}
+			
+			if (People[A_Index].Length < 4) {
+				Output := Output . FormatTime(, "MM/dd/yyyy") .  A_Tab
+			}
+			
+			Output := Output . Outcome . "`n"
 		}
 	}
 	
@@ -167,11 +183,13 @@ Loop Read "Patient_List.txt" {
 	}
 }*/
 
-backToMenu(*) {
-	ControlGetPos &x, &y, &w, &h, "CHwndCppBase Window Class5", "ahk_class MedentClient"
-	Sleep 20
+mouseMoveClick(ClassNN, Window := "ahk_class MedentClient", speed := 1.0) {
+	mouseGetPos(&oldx, &oldy)
+	ControlGetPos &x, &y, &w, &h, ClassNN, Window
+	Sleep 20 * speed
 	MouseMove x + (w / 2), y + (h / 2)
-	Sleep 200
-	ControlClick "CHwndCppBase Window Class5", "ahk_class MedentClient"
-	Sleep 400
+	Sleep 100 * speed
+	ControlClick ClassNN, Window
+	Sleep 20 * speed
+	MouseMove oldx, oldy
 }

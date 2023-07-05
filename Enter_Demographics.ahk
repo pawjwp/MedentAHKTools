@@ -42,13 +42,13 @@
 	RaceControl[1].Value := 1
 
 
-	; Create OK Button
-	Btn := DemographicGui.Add("Button", "Default XM Section", "OK")
-	Btn.OnEvent("Click", ProcessUserInput)
+	; Create Submit Button
+	SubmitBtn := StatusGui.Add("Button", "Default XM Section", "Submit")
+	SubmitBtn.OnEvent("Click", ProcessUserInput)
 	
 	; Create Cancel Button
-	Btn := DemographicGui.Add("Button", "YS", "Cancel")
-	Btn.OnEvent("Click", (*) => DemographicGui.Destroy())
+	CancelBtn := StatusGui.Add("Button", "YS", "Cancel")
+	CancelBtn.OnEvent("Click", (*) => StatusGui.Destroy())
 	
 	DemographicGui.OnEvent('Escape', (*) => DemographicGui.Destroy())
 	DemographicGui.Show()
