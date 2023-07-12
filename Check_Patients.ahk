@@ -33,6 +33,10 @@ Loop Read "Patient_List.txt" {
 		Outcome := ""
 		samePerson := false
 		
+		if (!cancelling) {
+			waitUntilControlHasText("CHwndCppBase Window Class14", "Create account f")
+		}
+		
 		if (ControlGetText("CHwndCppBase Window Class14", "ahk_class MedentClient") = "Create account f" && !cancelling) {
 			Sleep 100
 			ControlClick "RichEdit20A3", "ahk_class MedentClient"
@@ -50,24 +54,22 @@ Loop Read "Patient_List.txt" {
 			SendEvent Format("{:04}", dateSplit[3])
 			Sleep 200
 			Send "{Enter}"
-			Sleep 400
 			
-			/*
-			loading := true
-			while (loading) {
-				try {
-					if (ControlGetText("Pop Label Class1", "ahk_class MedentClient") = "No Patient(s) Found.") {
-						loading := true
-					}
-					if (ControlGetText("CHwndCppBase Window Class11", "ahk_class MedentClient") = "Select") {
-					}
-			}*/
+			waitUntilControlHasText("CHwndCppBase Window Class11", ["Continue", "Select", "Chart"])
+			
+			try {
+				if (ControlGetText("Pop Label Class1", "ahk_class MedentClient") = "No Patient(s) Found.") {
+					mouseMoveClick("CHwndCppBase Window Class11")
+					Sleep 200
+					Outcome := "NO"
+				}
+			}
 			
 			if (ControlGetText("CHwndCppBase Window Class11", "ahk_class MedentClient") = "Select") {
 				patientSelect := true
 				while (patientSelect) {
 					MouseMove 250, 200
-					result := MsgBox("Please select " . j . " then click Yes.`nIf name is now shown, click No",, "YNC 4096")
+					result := MsgBox("Please select " . j . " then click Yes.`nIf name is not shown, click No",, "YNC 4096")
 					if (result = "Yes") {
 						if (ControlGetText("CHwndCppBase Window Class11", "ahk_class MedentClient") != "Select") {
 							patientSelect := false
@@ -78,26 +80,16 @@ Loop Read "Patient_List.txt" {
 						patientSelect := false
 						mouseMoveClick("CHwndCppBase Window Class10")
 						Outcome := "NO"
-						Sleep 400
 					} else if (result = "Cancel") {
 						patientSelect := false
 						mouseMoveClick("CHwndCppBase Window Class10")
 						cancelling := true
-						Sleep 100
 					}
 				}
 			}
 			
-			try {
-				if (ControlGetText("Pop Label Class1", "ahk_class MedentClient") = "No Patient(s) Found.") {
-					mouseMoveClick("CHwndCppBase Window Class11")
-					Sleep 200
-					Outcome := "NO"
-				}
-			}
-			
 			if (Outcome = "") {
-				Sleep 800
+				waitUntilControlHasText("CHwndCppBase Window Class11", "Chart")
 			}
 			
 			if (ControlGetText("CHwndCppBase Window Class11", "ahk_class MedentClient") = "Chart") {
@@ -118,7 +110,6 @@ Loop Read "Patient_List.txt" {
 						} else if (result = "No") {
 							Outcome := "NO"
 							mouseMoveClick("CHwndCppBase Window Class5")
-							Sleep 400
 						} else if (result = "Cancel") {
 							mouseMoveClick("CHwndCppBase Window Class5")
 							cancelling := true
@@ -143,14 +134,12 @@ Loop Read "Patient_List.txt" {
 								}
 								Outcome := "YES" . k
 								mouseMoveClick("CHwndCppBase Window Class5")
-								Sleep 400
 							}
 						}
 					}
 				} else {
 					Outcome := "NO"
 					mouseMoveClick("CHwndCppBase Window Class5")
-					Sleep 400
 				}
 			}
 			
@@ -202,4 +191,26 @@ mouseMoveClick(ClassNN, Window := "ahk_class MedentClient", speed := 1.0) {
 	ControlClick ClassNN, Window
 	Sleep 20 * speed
 	MouseMove oldx, oldy
+}
+
+waitUntilControlHasText(ClassNN, ControlText, Window := "ahk_class MedentClient", eachWait := 100, waitNum := 50) {
+	Loop waitNum {
+		endLoop := false
+		try {
+			if (IsObject(ControlText)) {
+				for i in ControlText {
+					if (ControlGetText(ClassNN, "ahk_class MedentClient") = i) {
+						endLoop := true
+					}
+				}
+			}
+			if (ControlGetText(ClassNN, "ahk_class MedentClient") = ControlText) {
+				endLoop := true
+			}
+		}
+		if (endLoop) {
+			break
+		}
+		Sleep eachWait
+	}
 }
