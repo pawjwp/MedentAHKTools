@@ -23,6 +23,7 @@ Loop Read "Patient_List.txt" {
 ^+c::
 {
 	cancelling := false
+	skipUserInputs := false
 	SetKeyDelay 10
 	
 	Loop People.Length { ; i is DOB, j is first, last name MI
@@ -55,7 +56,12 @@ Loop Read "Patient_List.txt" {
 			Sleep 200
 			Send "{Enter}"
 			
-			waitUntilControlHasText("CHwndCppBase Window Class11", ["Continue", "Select", "Chart"])
+			if (waitUntilControlHasText("CHwndCppBase Window Class11", ["Continue", "Select", "Chart"])) {
+				if (MsgBox("Loading timed out, would you like to continue?",, "YC 4096") = "Cancel") {
+					cancelling := true
+				}
+			}
+			
 			
 			try {
 				if (ControlGetText("Pop Label Class1", "ahk_class MedentClient") = "No Patient(s) Found.") {
@@ -68,8 +74,12 @@ Loop Read "Patient_List.txt" {
 			if (ControlGetText("CHwndCppBase Window Class11", "ahk_class MedentClient") = "Select") {
 				patientSelect := true
 				while (patientSelect) {
-					MouseMove 250, 200
-					result := MsgBox("Please select " . j . " then click Yes.`nIf name is not shown, click No",, "YNC 4096")
+					if (skipUserInputs) {
+						result := "Skip"
+					} else {
+						result := MsgBox("Please select " . j . " then click Yes.`nIf name is not shown, click No",, "YNC 4096")
+					}
+					
 					if (result = "Yes") {
 						if (ControlGetText("CHwndCppBase Window Class11", "ahk_class MedentClient") != "Select") {
 							patientSelect := false
@@ -84,17 +94,18 @@ Loop Read "Patient_List.txt" {
 						patientSelect := false
 						mouseMoveClick("CHwndCppBase Window Class10")
 						cancelling := true
+					} else if (result = "Skip") {
+						patientSelect := false
+						mouseMoveClick("CHwndCppBase Window Class10")
 					}
 				}
 			}
 			
-			if (Outcome = "") {
+			if (Outcome = "" && !skipUserInputs) {
 				waitUntilControlHasText("CHwndCppBase Window Class11", "Chart")
 			}
 			
 			if (ControlGetText("CHwndCppBase Window Class11", "ahk_class MedentClient") = "Chart") {
-				; MsgBox(StrTitle(ControlGetText("RichEdit20A2", "ahk_class MedentClient") . ", " . ControlGetText("RichEdit20A1", "ahk_class MedentClient")) . "`n" . StrSplit(j, A_Space)[1] . " " . StrSplit(j, A_Space)[2])
-				
 				nameSplit := StrSplit(StrUpper(j), A_Space)
 				FiLN := StrSplit(nameSplit[1], ",")[1]
 				FiFN := StrSplit(nameSplit[2], ",")[1]
@@ -104,7 +115,12 @@ Loop Read "Patient_List.txt" {
 				
 				if (FiFN = MeFN || FiLN = MeLN || samePerson) {
 					if ((FiFN != MeFN || FiLN != MeLN) || (FiFN != MeFN && FiLN != MeLN && samePerson)) {
-						result := MsgBox("Is " . FiFN . " " . FiLN . " and " . MeFN . " " . MeLN . " the same person?",, "YNC 4096")
+						if (skipUserInputs) {
+							result := "Skip"
+						} else {
+							result := MsgBox("Is " . FiFN . " " . FiLN . " and " . MeFN . " " . MeLN . " the same person?",, "YNC 4096")
+						}
+						
 						if (result = "Yes") {
 							samePerson := true
 						} else if (result = "No") {
@@ -114,6 +130,8 @@ Loop Read "Patient_List.txt" {
 							mouseMoveClick("CHwndCppBase Window Class5")
 							cancelling := true
 							Sleep 100
+						} else if (result = "Skip") {
+							mouseMoveClick("CHwndCppBase Window Class5")
 						}
 					}
 					if ((FiFN = MeFN && FiLN = MeLN) || samePerson) {
@@ -193,9 +211,9 @@ mouseMoveClick(ClassNN, Window := "ahk_class MedentClient", speed := 1.0) {
 	MouseMove oldx, oldy
 }
 
-waitUntilControlHasText(ClassNN, ControlText, Window := "ahk_class MedentClient", eachWait := 100, waitNum := 50) {
+waitUntilControlHasText(ClassNN, ControlText, Window := "ahk_class MedentClient", eachWait := 200, waitNum := 50) {
+	endLoop := false
 	Loop waitNum {
-		endLoop := false
 		try {
 			if (IsObject(ControlText)) {
 				for i in ControlText {
@@ -213,4 +231,5 @@ waitUntilControlHasText(ClassNN, ControlText, Window := "ahk_class MedentClient"
 		}
 		Sleep eachWait
 	}
+	return !endLoop ; returns true if loop reached maximum iterations
 }
