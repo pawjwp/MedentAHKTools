@@ -3,7 +3,7 @@
 global Saved := false
 global fields := ["BirthdayMonth", "BirthdayDay", "BirthdayYear", "Sex", "FirstName", "MiddleName", "LastName", "Address1", "Address2", "City", "State", "Zip", "PhoneHome", "PhoneCell", "PhoneWork", "WorkExtension", "Email", "Language", "Ethnicity", "Race", "Doctor"]
 
-^+r::Reload  ; Ctrl+Alt+R
+^+r::Reload ; Ctrl+Alt+R
 
 ^+a::
 {
@@ -97,6 +97,10 @@ global fields := ["BirthdayMonth", "BirthdayDay", "BirthdayYear", "Sex", "FirstN
 	; Create Submit Load Current
 	PreviousBtn := NewPatientGui.AddButton("YS", "Load Current")
 	PreviousBtn.OnEvent("Click", (*) => LoadCurrent())
+	
+	; Create Submit Load Current
+	TestBtn := NewPatientGui.AddButton("YS", "Load Test")
+	TestBtn.OnEvent("Click", (*) => LoadTest())
 	
 	; Create Cancel Button
 	CancelBtn := NewPatientGui.AddButton("YS", "Cancel")
@@ -229,9 +233,32 @@ global fields := ["BirthdayMonth", "BirthdayDay", "BirthdayYear", "Sex", "FirstN
 		Resubmit.Visible := true
 	}
 	
+	LoadTest(*)	{
+		BirthdayMonth.Value := "01"
+		BirthdayDay.Value := "01"
+		BirthdayYear.Value := "2000"
+		Sex.Value := 1
+		FirstName.Value := "Test"
+		MiddleName.Value := "T"
+		LastName.Value := "Testington Jr"
+		Address1.Value := "1500 Main Street"
+		Address2.Value := "Box 100"
+		City.Value := "Beverly Hills"
+		State.Value := "CA"
+		Zip.Value := "90210"
+		PhoneHome.Value := "5555555555"
+		PhoneCell.Value := "5555555555"
+		PhoneWork.Value := "5555555555"
+		WorkExtension.Value := "Ext 5"
+		Email.Value := "testttestington@gmail.com"
+		Language.Value := 1
+		Ethnicity.Value := 2
+		Race.Value := 1
+	}
+	
 	ProcessUserInput(*)	{
 		global Saved := NewPatientGui.Submit()  ; Save the contents of named controls into an object.
-		
+		sleepTime := 150
 		
 		if (Current != false && Saved.Resubmit = false) {
 			for (fieldName in fields) {
@@ -258,15 +285,15 @@ global fields := ["BirthdayMonth", "BirthdayDay", "BirthdayYear", "Sex", "FirstN
 		
 		if (Saved.FirstName != "" && Saved.MiddleName != "" && Saved.LastName != "") {
 			ControlClick "RichEdit20A1", "ahk_class MedentClient"
-			Sleep 400
-			SendEvent Saved.FirstName
-			Sleep 100
+			Sleep sleepTime
+			sendByClipboard(Saved.FirstName)
+			Sleep sleepTime
 			SendEvent "{Tab}"
-			Sleep 600
-			SendEvent Saved.LastName
-			Sleep 100
+			Sleep sleepTime * 3
+			sendByClipboard(Saved.LastName)
+			Sleep sleepTime
 			SendEvent "{Tab}"
-			Sleep 400
+			Sleep sleepTime * 4
 			
 			try {
 				if (InStr(ControlGetText("Pop Label Class1", "ahk_class MedentClient"), "Already on File") > 0) {
@@ -274,98 +301,93 @@ global fields := ["BirthdayMonth", "BirthdayDay", "BirthdayYear", "Sex", "FirstN
 				}
 				if (continueResult != "No") {
 					if (ControlGetText("CHwndCppBase Window Class14", "ahk_class MedentClient") = "Yes") {
-						Sleep 200
-						ControlGetPos &x, &y, &w, &h, "CHwndCppBase Window Class14", "ahk_class MedentClient"
-						Sleep 200
-						MouseMove x + (w / 2), y + (h / 2)
-						Sleep 200
-						ControlClick "CHwndCppBase Window Class14", "ahk_class MedentClient"
+						mouseMoveClick("CHwndCppBase Window Class14")
 					}
-					Sleep 200
+					Sleep sleepTime
 					ControlClick "RichEdit20A3", "ahk_class MedentClient"
-					Sleep 200
+					Sleep sleepTime
 				}
 			}
-			SendEvent Saved.MiddleName ; truncate here
+			sendByClipboard(Saved.MiddleName) ; truncate here
 			Sleep 100
 		}
 		if (Saved.Address1 != "") {
 			ControlClick "RichEdit20A4", "ahk_class MedentClient"
-			Sleep 200
-			SendEvent Saved.Address1
-			Sleep 100
+			Sleep sleepTime
+			sendByClipboard(Saved.Address1)
+			Sleep sleepTime
 			SendEvent "{Tab}"
-			Sleep 400
-			SendEvent Saved.Address2
-			Sleep 200
+			Sleep sleepTime * 2
+			sendByClipboard(Saved.Address2)
+			Sleep sleepTime
 		}
 		if (Saved.Zip != "") {
 			ControlClick "RichEdit20A8", "ahk_class MedentClient"
-			Sleep 200
+			Sleep sleepTime
 			SendEvent Saved.Zip
-			Sleep 100
+			Sleep sleepTime
 			SendEvent "{Tab}"
-			Sleep 200
+			Sleep sleepTime * 2
 			SendEvent Saved.City
-			Sleep 200
+			Sleep sleepTime * 2
 			SendEvent "{Enter}"
-			Sleep 200
+			Sleep sleepTime * 2
 		}
 		if (Saved.PhoneHome != "" && Saved.PhoneCell != "" && Saved.PhoneWork != "" && Saved.WorkExtension != "") {
 			ControlClick "RichEdit20A8", "ahk_class MedentClient"
-			Sleep 100
+			Sleep sleepTime * 2
 			SendEvent "{Tab}"
-			Sleep 200
+			Sleep sleepTime
 			SendEvent Saved.PhoneHome
-			Sleep 100
+			Sleep sleepTime
 			if (Saved.PhoneCell != "" && Saved.PhoneWork != "" && Saved.WorkExtension != "") {
 				SendEvent "{Tab}"
-				Sleep 200
+				Sleep sleepTime
 				SendEvent Saved.PhoneCell
-				Sleep 100
+				Sleep sleepTime
 				if (Saved.PhoneWork != "" && Saved.WorkExtension != "") {
 					SendEvent "{Tab}"
-					Sleep 200
+					Sleep sleepTime
 					SendEvent Saved.PhoneWork
-					Sleep 100
+					Sleep sleepTime
 					if (Saved.WorkExtension != "") {
 						SendEvent "{Tab}"
-						Sleep 200
+						Sleep sleepTime
 						SendEvent Saved.WorkExtension
-						Sleep 100
+						Sleep sleepTime
 					}
 				}
 			}
 		}
 		if (Saved.Email != "") {
 			ControlClick "RichEdit20A13", "ahk_class MedentClient"
-			Sleep 200
-			SendEvent Saved.Email
-			Sleep 100
+			Sleep sleepTime
+			sendByClipboard(Saved.Email)
+			Sleep sleepTime
 		}
 		if (!(Saved.BirthdayMonth = "" || Saved.BirthdayDay = "" || Saved.BirthdayYear = "")) {
 			ControlClick "RichEdit20A14", "ahk_class MedentClient"
-			Sleep 100
+			Sleep sleepTime / 2
 			SendEvent "{Home}"
-			Sleep 100
+			Sleep sleepTime / 2
 			SendEvent Saved.BirthdayMonth
-			Sleep 100
+			Sleep sleepTime / 4
 			SendEvent Saved.BirthdayDay
-			Sleep 100
+			Sleep sleepTime / 4
 			if (StrLen(Saved.BirthdayYear) = 2) {
 				SendEvent Saved.BirthdayYear
 			} else if (StrLen(Saved.BirthdayYear) = 4) {
 				SendEvent "{Left}"
-				Sleep 100
+				Sleep sleepTime / 2
 				SendEvent "{Left}"
-				Sleep 100
+				Sleep sleepTime / 2
 				SendEvent Saved.BirthdayYear
 			}
-			Sleep 100
+			Sleep sleepTime
 		}
 		if (Saved.Sex != "") {
 			ControlClick "RichEdit20A15", "ahk_class MedentClient"
-			Sleep 200
+			Sleep sleepTime
 			switch Saved.Sex
 			{
 				case 1:
@@ -375,7 +397,7 @@ global fields := ["BirthdayMonth", "BirthdayDay", "BirthdayYear", "Sex", "FirstN
 				case 3:
 					SendEvent "U"
 			}
-			Sleep 200
+			Sleep sleepTime
 		}
 	
 		
@@ -506,6 +528,50 @@ global fields := ["BirthdayMonth", "BirthdayDay", "BirthdayYear", "Sex", "FirstN
 		
 		NewPatientGui.Destroy()
 	}
+}
+
+mouseMoveClick(ClassNN, Window := "ahk_class MedentClient", speed := 1.0) {
+	mouseGetPos(&oldx, &oldy)
+	ControlGetPos &x, &y, &w, &h, ClassNN, Window
+	Sleep 20 * speed
+	MouseMove x + (w / 2), y + (h / 2)
+	Sleep 100 * speed
+	ControlClick ClassNN, Window
+	Sleep 20 * speed
+	MouseMove oldx, oldy
+}
+
+waitUntilControlHasText(ClassNN, ControlText, Window := "ahk_class MedentClient", eachWait := 200, waitNum := 50) {
+	endLoop := false
+	Loop waitNum {
+		try {
+			if (IsObject(ControlText)) {
+				for i in ControlText {
+					if (ControlGetText(ClassNN, "ahk_class MedentClient") = i) {
+						endLoop := true
+					}
+				}
+			}
+			if (ControlGetText(ClassNN, "ahk_class MedentClient") = ControlText) {
+				endLoop := true
+			}
+		}
+		if (endLoop) {
+			break
+		}
+		Sleep eachWait
+	}
+	return !endLoop ; returns true if loop reached maximum iterations
+}
+
+sendByClipboard(textToSend) {
+	oldClipboard := ClipboardAll()
+	A_Clipboard := textToSend
+	Sleep 25
+	SendEvent "{RCtrl Down}v{RCtrl Up}"
+	Sleep 50
+	A_Clipboard := oldClipBoard
+	Sleep 25
 }
 
 /*
