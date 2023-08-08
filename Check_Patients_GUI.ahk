@@ -1,36 +1,50 @@
 #SingleInstance Force
 
-global People := Array()
 global Output := ""
 
-Loop Read "Patient_List.txt" {
-	patientSplit := StrSplit(A_LoopReadLine, A_Tab)
-	People.Push(patientSplit)
-	
-	; old
-	/*patientSplit := StrSplit(A_LoopReadLine, A_Tab)
-	nameSplit := StrSplit(patientSplit[1], A_Space)
-	dateSplit := StrSplit(patientSplit[2], "/")
-	People[Format("{:02}/", dateSplit[1]) . Format("{:02}/", dateSplit[2]) . Format("{:04}", dateSplit[3])] := nameSplit[1] . " " . nameSplit[2]*/
-}
+; Initialize Gui
+CheckPatientGui := Gui(, "Check Patient Status")
+
+; Street Address
+CheckPatientGui.AddText("Section", "Input:")
+InputText := CheckPatientGui.AddEdit("XS Section w480 r10 -Wrap vInputText")
+CheckPatientGui.AddText("XS Section", "Output:")
+OutputText := CheckPatientGui.AddEdit("XS Section w480 r10 -Wrap vOutputText")
+
+; Options
+CheckPatientGui.AddText("XS Section", "Options:")
+SkipUserInput := CheckPatientGui.AddCheckBox("XS Section vSkipUserInput", "Skip People Requiring Input?")
+
+
+
+; Create Run Button
+RunBtn := CheckPatientGui.AddButton("Default XM Section", "Run")
+RunBtn.OnEvent("Click", (*) => ProcessUserInput())
+
+; Create Exit Button
+ExitBtn := CheckPatientGui.AddButton("YS", "Exit")
+ExitBtn.OnEvent("Click", (*) => CheckPatientGui.Destroy())
+
+CheckPatientGui.OnEvent('Escape', (*) => CheckPatientGui.Destroy())
+
+CheckPatientGui.Show()
 
 
 
 
 
-^+r::Reload  ; Ctrl+Shift+R
-
-^+c::
-{
+ProcessUserInput(*)	{
 	cancelling := false
-	skipUserInputs := false
 	SetKeyDelay 10
 	
-	Loop People.Length { ; i is DOB, j is first, last name MI
-		i := People[A_Index][2]
-		j := People[A_Index][1]
+	
+	while ((StrLen(InputText.Value) > 1) and !cancelling) {
+		Inputs := StrSplit(InputText.Value, "`n",, 2)
+		patientSplit := StrSplit(Inputs[1], A_Tab)
 		
-		global Output
+		i := patientSplit[2]
+		j := patientSplit[1]
+		
 		Outcome := ""
 		samePerson := false
 		
@@ -74,7 +88,7 @@ Loop Read "Patient_List.txt" {
 			if (ControlGetText("CHwndCppBase Window Class11", "ahk_class MedentClient") = "Select") {
 				patientSelect := true
 				while (patientSelect) {
-					if (skipUserInputs) {
+					if (SkipUserInput.Value) {
 						result := "Skip"
 					} else {
 						result := MsgBox("Please select " . j . " then click Yes.`nIf name is not shown, click No",, "YNC 4096")
@@ -101,7 +115,7 @@ Loop Read "Patient_List.txt" {
 				}
 			}
 			
-			if (Outcome = "" && !skipUserInputs) {
+			if (Outcome = "" && !SkipUserInput.Value) {
 				waitUntilControlHasText("CHwndCppBase Window Class11", "Chart")
 			}
 			
@@ -115,7 +129,7 @@ Loop Read "Patient_List.txt" {
 				
 				if (FiFN = MeFN || FiLN = MeLN || samePerson) {
 					if ((FiFN != MeFN || FiLN != MeLN) || (FiFN != MeFN && FiLN != MeLN && samePerson)) {
-						if (skipUserInputs) {
+						if (SkipUserInput.Value) {
 							result := "Skip"
 						} else {
 							result := MsgBox("Is " . FiFN . " " . FiLN . " and " . MeFN . " " . MeLN . " the same person?",, "YNC 4096")
@@ -142,8 +156,8 @@ Loop Read "Patient_List.txt" {
 							if (ControlGetText("CHwndCppBase Window Class26", "ahk_class MedentClient") = "Status") {
 								mouseMoveClick("CHwndCppBase Window Class26")
 							}
-							
-							Sleep 800
+						
+							waitUntilControlHasText("CHwndCppBase Window Class12", "Billing Related ")
 							
 							if (ControlGetText("CHwndCppBase Window Class12", "ahk_class MedentClient") = "Billing Related ") {
 								k := ""
@@ -151,6 +165,7 @@ Loop Read "Patient_List.txt" {
 									k := ", " . StrUpper(StrSplit(ControlGetText("RichEdit20A1", "ahk_class MedentClient"), " ")[1])
 								}
 								Outcome := "YES" . k
+
 								mouseMoveClick("CHwndCppBase Window Class5")
 							}
 						}
@@ -168,25 +183,32 @@ Loop Read "Patient_List.txt" {
 		}
 		
 		if (Outcome = "") {
-			for p in People[A_Index] {
-				Output := Output . p . A_Tab
+			for p in patientSplit {
+				OutputText.Value := OutputText.Value . p . A_Tab
 			}
-			Output := Output . "`n"
+			if (Inputs.Length > 1) {
+				InputText.Value := Inputs[2]
+			} else {
+				InputText.Value := ""
+			}
+			OutputText.Value := OutputText.Value . "`n"
 		} else {
-			for p in People[A_Index] {
-				Output := Output . StrUpper(p) . A_Tab
+			for p in patientSplit {
+				OutputText.Value := OutputText.Value . StrUpper(p) . A_Tab
 			}
 			
-			if (People[A_Index].Length < 4) {
-				Output := Output . FormatTime(, "MM/dd/yyyy") .  A_Tab
+			if (patientSplit.Length < 4) {
+				OutputText.Value := OutputText.Value . FormatTime(, "MM/dd/yyyy") .  A_Tab
 			}
 			
-			Output := Output . Outcome . "`n"
+			if (Inputs.Length > 1) {
+				InputText.Value := Inputs[2]
+			} else {
+				InputText.Value := ""
+			}
+			OutputText.Value := OutputText.Value . Outcome . "`n"
 		}
 	}
-	
-	try FileDelete "Output.txt"
-	FileAppend Output, "Output.txt"
 }
 
 

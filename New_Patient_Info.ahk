@@ -21,7 +21,6 @@ global fields := ["BirthdayMonth", "BirthdayDay", "BirthdayYear", "Sex", "FirstN
 	; Date of Birth and Sex
 	NewPatientGui.AddText("Section", "Birthday:")
 	BirthdayMonth := NewPatientGui.AddEdit("YS-3 X+13 w23 r1 vBirthdayMonth Number Limit2")
-
 	NewPatientGui.AddText("YS X+3", "/")
 	BirthdayDay := NewPatientGui.AddEdit("YS-3 X+3 w23 r1 vBirthdayDay Number Limit2")
 	NewPatientGui.AddText("YS X+3", "/")
